@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="three_link_manipulator">
+
+    <!--
+    Simple 3-DOF manipulator xacro.
+    Macro: three_link_manipulator(prefix)
+    - prefix: string prepended to all link and joint names (useful when composing into larger URDFs)
+
+    Joints (revolute, z axis):
+    - ${prefix}linkk_1_joint
+    - ${prefix}link_2_joint
+    - ${prefix}link_3_joint
+
+    Each joint exposes position and velocity state (and accepts position command through ros2_control).
+  -->
+
+    <xacro:macro name="three_link_manipulator" params="prefix">
+
+        <!-- base link attached to robot base -->
+        <link name="${prefix}manipulator_base_link">
+            <visual>
+                <geometry>
+                    <box size="0.12 0.12 0.02"/>
+                </geometry>
+                <material name="grey">
+                    <color rgba="0.6 0.6 0.6 1.0"/>
+                </material>
+            </visual>
+            <inertial>
+                <mass value="0.1"/>
+                <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+            </inertial>
+        </link>
+
+        <!-- Link 1 -->
+        <link name="${prefix}linkk_1_link">
+            <visual>
+                <origin xyz="0 0 0.06" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.12" radius="0.03"/>
+                </geometry>
+                <material name="blue">
+                    <color rgba="0.2 0.4 0.8 1.0"/>
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0.06" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.12" radius="0.03"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.2"/>
+                <inertia ixx="0.0005" ixy="0.0" ixz="0.0" iyy="0.0005" iyz="0.0" izz="0.0005"/>
+            </inertial>
+        </link>
+
+        <!-- Link 2 -->
+        <link name="${prefix}link_2_link">
+            <visual>
+                <origin xyz="0 0 0.09" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.18" radius="0.025"/>
+                </geometry>
+                <material name="green">
+                    <color rgba="0.2 0.8 0.3 1.0"/>
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0.09" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.18" radius="0.025"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.15"/>
+                <inertia ixx="0.0004" ixy="0.0" ixz="0.0" iyy="0.0004" iyz="0.0" izz="0.0004"/>
+            </inertial>
+        </link>
+
+        <!-- Link 3 / end effector -->
+        <link name="${prefix}link_3_link">
+            <visual>
+                <origin xyz="0 0 0.05" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.1" radius="0.02"/>
+                </geometry>
+                <material name="red">
+                    <color rgba="0.8 0.2 0.2 1.0"/>
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0.05" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.1" radius="0.02"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.08"/>
+                <inertia ixx="0.0002" ixy="0.0" ixz="0.0" iyy="0.0002" iyz="0.0" izz="0.0002"/>
+            </inertial>
+        </link>
+
+        <!-- Joint 1: base -> linkk_1 -->
+        <joint name="${prefix}linkk_1_joint" type="revolute">
+            <parent link="${prefix}manipulator_base_link"/>
+            <child link="${prefix}linkk_1_link"/>
+            <origin xyz="0 0 0.01" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit effort="5.0" velocity="1.0" lower="-3.1416" upper="3.1416"/>
+            <dynamics damping="0.1" friction="0.0"/>
+        </joint>
+
+        <!-- Joint 2: linkk_1 -> link_2 -->
+        <joint name="${prefix}link_2_joint" type="revolute">
+            <parent link="${prefix}linkk_1_link"/>
+            <child link="${prefix}link_2_link"/>
+            <origin xyz="0 0 0.12" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit effort="5.0" velocity="1.0" lower="-3.1416" upper="3.1416"/>
+            <dynamics damping="0.1" friction="0.0"/>
+        </joint>
+
+        <!-- Joint 3: link_2 -> link_3 -->
+        <joint name="${prefix}link_3_joint" type="revolute">
+            <parent link="${prefix}link_2_link"/>
+            <child link="${prefix}link_3_link"/>
+            <origin xyz="0 0 0.18" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit effort="5.0" velocity="1.0" lower="-3.1416" upper="3.1416"/>
+            <dynamics damping="0.1" friction="0.0"/>
+        </joint>
+
+    </xacro:macro>
+
+</robot>
