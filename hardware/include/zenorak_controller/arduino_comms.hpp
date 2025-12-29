@@ -53,59 +53,70 @@ public:
     return serial_conn_.IsOpen();
   }
 
+  // std::string send_and_receive(const std::string &msg)
+  // {
+  //   serial_conn_.Write(msg);
 
-  std::string send_msg(const std::string &msg_to_send, bool print_output = false)
+  //   std::string response;
+  //   serial_conn_.ReadLine(response, '\n', timeout_ms_);
+  //   return response;
+  // }
+  void send_only(const std::string &msg)
   {
-    serial_conn_.FlushIOBuffers(); // Just in case
+    serial_conn_.Write(msg);
+  }
+
+
+  bool send_msg(const std::string &msg_to_send, std::string &response)
+{
+  try
+  {
     serial_conn_.Write(msg_to_send);
-
-    std::string response = "";
-    try
-    {
-      // Responses end with \r\n so we will read up to (and including) the \n.
-      serial_conn_.ReadLine(response, '\n', timeout_ms_);
-    }
-    catch (const LibSerial::ReadTimeout&)
-    {
-        std::cerr << "The ReadByte() call has timed out." << std::endl ;
-    }
-
-    if (print_output)
-    {
-      std::cout << "Sent: " << msg_to_send << " Recv: " << response << std::endl;
-    }
-
-    return response;
+    serial_conn_.ReadLine(response, '\n', timeout_ms_);
+    return true;   // success
   }
-
-
-  void send_empty_msg()
+  catch (const LibSerial::ReadTimeout&)
   {
-    std::string response = send_msg("\r");
+    // DO NOT throw
+    // DO NOT print every time
+    return false;  // timeout happened
   }
+}
 
+
+  // void send_empty_msg()
+  // {
+  //   std::string response = send_msg("\r");
+  // }
   void read_encoder_values(int &val_1, int &val_2)
   {
-    std::string response = send_msg("e\r");
+    std::string response;
+    bool ok = send_msg("e\r", response);
 
-    std::string delimiter = " ";
-    size_t del_pos = response.find(delimiter);
-    std::string token_1 = response.substr(0, del_pos);
-    std::string token_2 = response.substr(del_pos + delimiter.length());
+    if (!ok) {
+      // timeout → keep last values
+      return;
+    }
 
-    val_1 = std::atoi(token_1.c_str());
-    val_2 = std::atoi(token_2.c_str());
+    std::stringstream ss(response);
+    ss >> val_1 >> val_2;
   }
-  
+
   // Read three actuator values (e.g. ADC or encoder counts) from the Arduino.
   // Expected response: "v1 v2 v3\n" (space separated ints)
   void read_actuator_values(int &val_1, int &val_2, int &val_3)
   {
-    std::string response = send_msg("a\r");
-    std::istringstream iss(response);
-    val_1 = 0; val_2 = 0; val_3 = 0;
-    iss >> val_1 >> val_2 >> val_3;
+    std::string response;
+    bool ok = send_msg("a\r", response);
+
+    if (!ok) {
+      return;
+    }
+
+    std::stringstream ss(response);
+    ss >> val_1 >> val_2 >> val_3;
   }
+
 
   // Send actuator target positions (in counts) to the Arduino.
   // Message format: "s v1 v2 v3\r"
@@ -113,20 +124,20 @@ public:
   {
     std::stringstream ss;
     ss << "s " << val_1 << " " << val_2 << " " << val_3 << "\r";
-    send_msg(ss.str());
+    send_only(ss.str());
   }
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
     ss << "m " << val_1 << " " << val_2 << "\r";
-    send_msg(ss.str());
+    send_only(ss.str());
   }
 
   void set_pid_values(int k_p, int k_d, int k_i, int k_o)
   {
     std::stringstream ss;
     ss << "u " << k_p << ":" << k_d << ":" << k_i << ":" << k_o << "\r";
-    send_msg(ss.str());
+    // send_msg(ss.str());
   }
 
 private:

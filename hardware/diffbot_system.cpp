@@ -267,7 +267,7 @@ hardware_interface::return_type Zenorak_Hardware::read(
   Actuator_l1.pos = Actuator_l1.potToAngle(
     a1,
     0.0, 80.0,     // logical angle range
-    470, 670       // pot range
+    460, 730       // pot range
   );
   Actuator_l1.vel = (Actuator_l1.pos - prev_pos) / delta_seconds;
 
@@ -277,7 +277,7 @@ hardware_interface::return_type Zenorak_Hardware::read(
   Actuator_l2.pos = Actuator_l2.potToAngle(
     a2,
     0.0, 80.0,
-    150, 430
+    150, 500
   );
   Actuator_l2.vel = (Actuator_l2.pos - prev_pos) / delta_seconds;
 
@@ -287,9 +287,23 @@ hardware_interface::return_type Zenorak_Hardware::read(
   Actuator_l3.pos = Actuator_l3.potToAngle(
     a3,
     0.0, 80.0,
-    90, 460
+    85, 430
   );
   Actuator_l3.vel = (Actuator_l3.pos - prev_pos) / delta_seconds;
+
+
+    RCLCPP_INFO(
+      rclcpp::get_logger("HW"),
+      "Arm cmd: %f %f %f | Wheels: L=%d R=%d",
+      Actuator_l1.pos,
+      Actuator_l2.pos,
+      Actuator_l3.pos,
+      wheel_l_.enc,
+      wheel_r_.enc
+    );
+
+  
+
   return hardware_interface::return_type::OK;
 }
 
@@ -309,40 +323,40 @@ hardware_interface::return_type zenorak_controller ::Zenorak_Hardware::write(
   int a1_target = Actuator_l1.angleToPot(
     Actuator_l1.cmd,
     0.0, 80.0,     // angle range in degrees
-    470, 670         // pot range
+    460, 730        // pot range
   );
 
   int a2_target = Actuator_l2.angleToPot(
     Actuator_l2.cmd,
     0.0, 80.0,
-    150, 430
+    150, 500
   );
 
   int a3_target = Actuator_l3.angleToPot(
     Actuator_l3.cmd,
     0.0, 80.0,
-    90, 460
+    85, 430
   );
-  static double last_a1 = 470, last_a2 = 150, last_a3 = 90;
+  // static double last_a1 = 470, last_a2 = 150, last_a3 = 90;
 
-  if (a1_target != last_a1 ||
-      a1_target != last_a2 ||
-      a1_target != last_a3)
-  {
-    RCLCPP_INFO(
-      rclcpp::get_logger("HW"),
-      "Arm cmd: %d %d %d | Wheels: L=%d R=%d",
-      a1_target,
-      a2_target,
-      a3_target,
-      motor_l_counts_per_loop,
-      motor_r_counts_per_loop
-    );
+  // if (a1_target != last_a1 ||
+  //     a1_target != last_a2 ||
+  //     a1_target != last_a3)
+  // {
+  //   RCLCPP_INFO(
+  //     rclcpp::get_logger("HW"),
+  //     "Arm cmd: %d %d %d | Wheels: L=%d R=%d",
+  //     a1_target,
+  //     a2_target,
+  //     a3_target,
+  //     motor_l_counts_per_loop,
+  //     motor_r_counts_per_loop
+  //   );
 
-    last_a1 = a1_target;
-    last_a2 = a2_target;
-    last_a3 = a3_target;
-  }
+  //   last_a1 = a1_target;
+  //   last_a2 = a2_target;
+  //   last_a3 = a3_target;
+  // }
 
   comms_.set_actuator_positions(a1_target, a2_target, a3_target);
   return hardware_interface::return_type::OK;
