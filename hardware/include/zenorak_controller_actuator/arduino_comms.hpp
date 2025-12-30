@@ -90,17 +90,18 @@ public:
   // }
   // Read three actuator values (e.g. ADC or encoder counts) from the Arduino.
   // Expected response: "v1 v2 v3\n" (space separated ints)
-  void read_actuator_values(int &val_1, int &val_2, int &val_3)
+  bool read_actuator_values(int &val_1, int &val_2, int &val_3)
   {
     std::string response;
     bool ok = send_msg("a\r", response);
 
     if (!ok) {
-      return;
+      return false;
     }
 
     std::stringstream ss(response);
     ss >> val_1 >> val_2 >> val_3;
+    return true;
   }
 
 

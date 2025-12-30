@@ -105,6 +105,8 @@ private:
   Actuator Actuator_l1;
   Actuator Actuator_l2;
   Actuator Actuator_l3;
+  void try_reconnect();
+
 };
 
 }  // namespace zenorak_controller_actuator

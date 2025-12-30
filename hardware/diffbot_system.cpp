@@ -126,6 +126,33 @@ hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_init(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
+void Zenorak_Hardware_Actuator::try_reconnect()
+{
+  static rclcpp::Time last_attempt(0, 0, RCL_ROS_TIME);
+  auto now = rclcpp::Clock().now();
+
+  if ((now - last_attempt).seconds() < 2.0)
+    return;
+
+  last_attempt = now;
+
+  try
+  {
+    if (comms_.connected())
+      comms_.disconnect();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+    comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
+
+    RCLCPP_INFO(rclcpp::get_logger("HW"), "Actuator serial reconnected");
+  }
+  catch (...)
+  {
+    RCLCPP_WARN(rclcpp::get_logger("HW"), "Reconnect attempt failed");
+  }
+}
+
 std::vector<hardware_interface::StateInterface> Zenorak_Hardware_Actuator::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
@@ -224,7 +251,8 @@ hardware_interface::return_type Zenorak_Hardware_Actuator::read(
 {
   if (!comms_.connected())
   {
-    return hardware_interface::return_type::ERROR;
+  try_reconnect();
+  return hardware_interface::return_type::OK;
   }
 
   double delta_seconds = period.seconds();
@@ -284,7 +312,8 @@ hardware_interface::return_type zenorak_controller_actuator ::Zenorak_Hardware_A
 {
   if (!comms_.connected())
   {
-    return hardware_interface::return_type::ERROR;
+  try_reconnect();
+  return hardware_interface::return_type::OK;
   }
 
   // Wheel/motor command handling removed; only actuator position commands are sent below.
