@@ -29,7 +29,7 @@ def generate_launch_description():
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("zenorak_controller"), "urdf", "diffbot.urdf.xacro"]
+                [FindPackageShare("zenorak_controller_actuator"), "urdf", "diffbot.urdf.xacro"]
             ),
         ]
     )
@@ -38,13 +38,13 @@ def generate_launch_description():
 
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare("zenorak_controller"),
+            FindPackageShare("zenorak_controller_actuator"),
             "config",
             "diffbot_controllers.yaml",
         ]
     )
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare("zenorak_controller"), "rviz", "diffbot.rviz"]
+        [FindPackageShare("zenorak_controller_actuator"), "rviz", "diffbot.rviz"]
     )
 
     control_node = Node(
@@ -53,22 +53,22 @@ def generate_launch_description():
         parameters=[robot_description, robot_controllers],
         output="both",
     )
-    robot_state_pub_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
-        remappings=[
-            ("/diff_drive_controller/cmd_vel_unstamped", "/cmd_vel"),
-        ],
-    )
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", rviz_config_file],
-    )
+    # robot_state_pub_node = Node(
+    #     package="robot_state_publisher",
+    #     executable="robot_state_publisher",
+    #     output="both",
+    #     parameters=[robot_description],
+    #     remappings=[
+    #         ("/diff_drive_controller/cmd_vel_unstamped", "/cmd_vel"),
+    #     ],
+    # )
+    # rviz_node = Node(
+    #     package="rviz2",
+    #     executable="rviz2",
+    #     name="rviz2",
+    #     output="log",
+    #     arguments=["-d", rviz_config_file],
+    # )
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -76,11 +76,11 @@ def generate_launch_description():
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
     )
 
-    robot_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
-    )
+    # robot_controller_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
+    # )
 
     # Spawner for arm_trajectory_controller (group controller for manipulator)
     arm_trajectory_spawner = Node(
@@ -89,28 +89,29 @@ def generate_launch_description():
         arguments=["arm_trajectory_controller", "--controller-manager", "/controller_manager"],
     )
 
-    # Delay rviz start after `joint_state_broadcaster`
-    delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[rviz_node],
-        )
-    )
+    # # Delay rviz start after `joint_state_broadcaster`
+    # delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+    #     event_handler=OnProcessExit(
+    #         target_action=joint_state_broadcaster_spawner,
+    #         on_exit=[rviz_node],
+    #     )
+    # )
 
-    # Delay start of robot_controller after `joint_state_broadcaster`
-    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[robot_controller_spawner, arm_trajectory_spawner],
-        )
-    )
+    # # Delay start of robot_controller after `joint_state_broadcaster`
+    # delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+    #     event_handler=OnProcessExit(
+    #         target_action=joint_state_broadcaster_spawner,
+    #         on_exit=[robot_controller_spawner, arm_trajectory_spawner],
+    #     )
+    # )
 
     nodes = [
         control_node,
-        robot_state_pub_node,
+       # robot_state_pub_node,
         joint_state_broadcaster_spawner,
-        delay_rviz_after_joint_state_broadcaster_spawner,
-        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+       # delay_rviz_after_joint_state_broadcaster_spawner,
+       arm_trajectory_spawner,
+        
     ]
 
     return LaunchDescription(nodes)

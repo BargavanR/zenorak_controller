@@ -6,7 +6,7 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "/home/bargavan/ros2controlforzenorak/install/zenorak_controller/include/**",
+        "/home/bargavan/ros2controlforzenorak/install/zenorak_controller_actuator/include/**",
         "/opt/ros/humble/include/**",
         "/usr/include/**"
       ],

@@ -5,7 +5,7 @@
 
     <ros2_control name="${name}" type="system">
       <hardware>
-        <plugin>zenorak_controller/Zenorak_Hardware</plugin>
+        <plugin>zenorak_controller_actuator/Zenorak_Hardware_Actuator</plugin>
         <!-- Wheel/motor parameters removed - only actuator params kept -->
         <param name="device">/dev/ttyACM0</param>
         <param name="baud_rate">115200</param>

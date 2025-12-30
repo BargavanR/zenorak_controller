@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "zenorak_controller/diffbot_system.hpp"
+#include "zenorak_controller_actuator/diffbot_system.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -23,9 +23,9 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-namespace zenorak_controller
+namespace zenorak_controller_actuator
 {
-hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
+hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_init(
   const hardware_interface::HardwareInfo & info)
 {
   if (
@@ -62,7 +62,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
   }
   else
   {
-    RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "PID values not supplied, using defaults.");
+    RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "PID values not supplied, using defaults.");
   }
   
 
@@ -78,7 +78,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
     if (joint.command_interfaces.size() != 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("Zenorak_Hardware"),
+        rclcpp::get_logger("Zenorak_Hardware_Actuator"),
         "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
         joint.command_interfaces.size());
       return hardware_interface::CallbackReturn::ERROR;
@@ -88,7 +88,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
     if (cmd_if != hardware_interface::HW_IF_VELOCITY && cmd_if != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("Zenorak_Hardware"),
+        rclcpp::get_logger("Zenorak_Hardware_Actuator"),
         "Joint '%s' has unsupported command interface '%s'. '%s' or '%s' expected.",
         joint.name.c_str(), cmd_if.c_str(), hardware_interface::HW_IF_VELOCITY,
         hardware_interface::HW_IF_POSITION);
@@ -98,7 +98,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
     if (joint.state_interfaces.size() < 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("Zenorak_Hardware"),
+        rclcpp::get_logger("Zenorak_Hardware_Actuator"),
         "Joint '%s' has %zu state interfaces. At least 1 expected.", joint.name.c_str(),
         joint.state_interfaces.size());
       return hardware_interface::CallbackReturn::ERROR;
@@ -107,7 +107,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
     if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("Zenorak_Hardware"),
+        rclcpp::get_logger("Zenorak_Hardware_Actuator"),
         "Joint '%s' has '%s' as first state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
       return hardware_interface::CallbackReturn::ERROR;
@@ -116,7 +116,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
     if (joint.state_interfaces.size() > 1 && joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("Zenorak_Hardware"),
+        rclcpp::get_logger("Zenorak_Hardware_Actuator"),
         "Joint '%s' has unexpected second state interface '%s'. '%s' expected if present.",
         joint.name.c_str(), joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return hardware_interface::CallbackReturn::ERROR;
@@ -126,7 +126,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> Zenorak_Hardware::export_state_interfaces()
+std::vector<hardware_interface::StateInterface> Zenorak_Hardware_Actuator::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
@@ -148,7 +148,7 @@ std::vector<hardware_interface::StateInterface> Zenorak_Hardware::export_state_i
   return state_interfaces;
 }
 
-std::vector<hardware_interface::CommandInterface> Zenorak_Hardware::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface> Zenorak_Hardware_Actuator::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
@@ -165,38 +165,38 @@ std::vector<hardware_interface::CommandInterface> Zenorak_Hardware::export_comma
   return command_interfaces;
 }
 
-hardware_interface::CallbackReturn Zenorak_Hardware::on_configure(
+hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Configuring ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Configuring ...please wait...");
   if (comms_.connected())
   {
     comms_.disconnect();
   }
   comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Successfully configured!");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Successfully configured!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn Zenorak_Hardware::on_cleanup(
+hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_cleanup(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Cleaning up ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Cleaning up ...please wait...");
   if (comms_.connected())
   {
     comms_.disconnect();
   }
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Successfully cleaned up!");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Successfully cleaned up!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 
-hardware_interface::CallbackReturn Zenorak_Hardware::on_activate(
+hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Activating ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Activating ...please wait...");
   if (!comms_.connected())
   {
     return hardware_interface::CallbackReturn::ERROR;
@@ -205,21 +205,21 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_activate(
   {
     comms_.set_pid_values(cfg_.pid_p,cfg_.pid_d,cfg_.pid_i,cfg_.pid_o);
   }
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Successfully activated!");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn Zenorak_Hardware::on_deactivate(
+hardware_interface::CallbackReturn Zenorak_Hardware_Actuator::on_deactivate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Deactivating ...please wait...");
-  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware"), "Successfully deactivated!");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Deactivating ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("Zenorak_Hardware_Actuator"), "Successfully deactivated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type Zenorak_Hardware::read(
+hardware_interface::return_type Zenorak_Hardware_Actuator::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
   if (!comms_.connected())
@@ -279,7 +279,7 @@ hardware_interface::return_type Zenorak_Hardware::read(
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type zenorak_controller ::Zenorak_Hardware::write(
+hardware_interface::return_type zenorak_controller_actuator ::Zenorak_Hardware_Actuator::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   if (!comms_.connected())
@@ -332,8 +332,8 @@ hardware_interface::return_type zenorak_controller ::Zenorak_Hardware::write(
   return hardware_interface::return_type::OK;
 }
 
-}  // namespace zenorak_controller
+}  // namespace zenorak_controller_actuator
 
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(
-  zenorak_controller::Zenorak_Hardware, hardware_interface::SystemInterface)
+  zenorak_controller_actuator::Zenorak_Hardware_Actuator, hardware_interface::SystemInterface)

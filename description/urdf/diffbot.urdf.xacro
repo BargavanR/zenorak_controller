@@ -3,19 +3,19 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="diffdrive_robot">
   <xacro:arg name="prefix" default="" />
 
-  <xacro:include filename="$(find zenorak_controller)/urdf/diffbot_description.urdf.xacro" />
+  <xacro:include filename="$(find zenorak_controller_actuator)/urdf/diffbot_description.urdf.xacro" />
 
   <!-- Import Rviz colors -->
-  <xacro:include filename="$(find zenorak_controller)/urdf/diffbot.materials.xacro" />
+  <xacro:include filename="$(find zenorak_controller_actuator)/urdf/diffbot.materials.xacro" />
 
   <!-- Import diffbot ros2_control description -->
-  <xacro:include filename="$(find zenorak_controller)/ros2_control/diffbot.ros2_control.xacro" />
+  <xacro:include filename="$(find zenorak_controller_actuator)/ros2_control/diffbot.ros2_control.xacro" />
 
   <xacro:diffbot prefix="$(arg prefix)" />
 
   <!-- Include the 3-DOF manipulator and expand it with no extra prefix -->
   <!-- Use the package-installed 'urdf' location so xacro finds the file after install -->
-  <xacro:include filename="$(find zenorak_controller)/urdf/three_link_manipulator.urdf.xacro" />
+  <xacro:include filename="$(find zenorak_controller_actuator)/urdf/three_link_manipulator.urdf.xacro" />
   <xacro:three_link_manipulator prefix="$(arg prefix)" />
 
   <xacro:diffbot_ros2_control name="DiffBot" prefix="$(arg prefix)" />
