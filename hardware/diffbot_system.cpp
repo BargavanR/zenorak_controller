@@ -36,13 +36,10 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
   }
 
 
-  cfg_.left_wheel_name = info_.hardware_parameters["left_wheel_name"];
-  cfg_.right_wheel_name = info_.hardware_parameters["right_wheel_name"];
-  cfg_.loop_rate = std::stof(info_.hardware_parameters["loop_rate"]);
+  // Device and communication parameters
   cfg_.device = info_.hardware_parameters["device"];
   cfg_.baud_rate = std::stoi(info_.hardware_parameters["baud_rate"]);
   cfg_.timeout_ms = std::stoi(info_.hardware_parameters["timeout_ms"]);
-  cfg_.enc_counts_per_rev = std::stoi(info_.hardware_parameters["enc_counts_per_rev"]);
   cfg_.link1_name = info_.hardware_parameters["link1_name"];
   cfg_.link2_name = info_.hardware_parameters["link2_name"];
   cfg_.link3_name = info_.hardware_parameters["link3_name"];
@@ -69,8 +66,7 @@ hardware_interface::CallbackReturn Zenorak_Hardware::on_init(
   }
   
 
-  wheel_l_.setup(cfg_.left_wheel_name, cfg_.enc_counts_per_rev);
-  wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
+  // Wheels removed. Only setup actuators.
   Actuator_l1.setup(cfg_.link1_name);
   Actuator_l2.setup(cfg_.link2_name);
   Actuator_l3.setup(cfg_.link3_name);
@@ -134,15 +130,7 @@ std::vector<hardware_interface::StateInterface> Zenorak_Hardware::export_state_i
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    wheel_l_.name, hardware_interface::HW_IF_POSITION, &wheel_l_.pos));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    wheel_l_.name, hardware_interface::HW_IF_VELOCITY, &wheel_l_.vel));
-
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    wheel_r_.name, hardware_interface::HW_IF_POSITION, &wheel_r_.pos));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.vel));
+  // Wheel state interfaces removed: only actuators expose state below.
 
   // Actuator position (and optional velocity) state interfaces
   state_interfaces.emplace_back(hardware_interface::StateInterface(
@@ -164,11 +152,7 @@ std::vector<hardware_interface::CommandInterface> Zenorak_Hardware::export_comma
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
-  command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    wheel_l_.name, hardware_interface::HW_IF_VELOCITY, &wheel_l_.cmd));
-
-  command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.cmd));
+  // Wheel command interfaces removed. Actuators accept position commands below.
 
   // Actuators accept position commands (joint_trajectory_controller will send position commands)
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
@@ -243,17 +227,7 @@ hardware_interface::return_type Zenorak_Hardware::read(
     return hardware_interface::return_type::ERROR;
   }
 
-  comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
-
   double delta_seconds = period.seconds();
-
-  double pos_prev = wheel_l_.pos;
-  wheel_l_.pos = wheel_l_.calc_enc_angle();
-  wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
-
-  pos_prev = wheel_r_.pos;
-  wheel_r_.pos = wheel_r_.calc_enc_angle();
-  wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
 
   // Read actuator raw counts/ADC values from Arduino and update actuator state
   int a1 = 0, a2 = 0, a3 = 0;
@@ -294,12 +268,10 @@ hardware_interface::return_type Zenorak_Hardware::read(
 
     RCLCPP_INFO(
       rclcpp::get_logger("HW"),
-      "Arm cmd: %f %f %f | Wheels: L=%d R=%d",
+      "Arm pos: %f %f %f",
       Actuator_l1.pos,
       Actuator_l2.pos,
-      Actuator_l3.pos,
-      wheel_l_.enc,
-      wheel_r_.enc
+      Actuator_l3.pos
     );
 
   
@@ -315,9 +287,7 @@ hardware_interface::return_type zenorak_controller ::Zenorak_Hardware::write(
     return hardware_interface::return_type::ERROR;
   }
 
-  int motor_l_counts_per_loop = wheel_l_.cmd / wheel_l_.rads_per_count / cfg_.loop_rate;
-  int motor_r_counts_per_loop = wheel_r_.cmd / wheel_r_.rads_per_count / cfg_.loop_rate;
-  comms_.set_motor_values(motor_l_counts_per_loop, motor_r_counts_per_loop);
+  // Wheel/motor command handling removed; only actuator position commands are sent below.
 
   // Convert actuator desired positions (radians) into counts and send to Arduino
   int a1_target = Actuator_l1.angleToPot(

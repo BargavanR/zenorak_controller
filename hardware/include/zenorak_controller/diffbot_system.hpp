@@ -32,7 +32,6 @@
 #include "zenorak_controller/visibility_control.h"
 
 #include "zenorak_controller/arduino_comms.hpp"
-#include "zenorak_controller/wheel.hpp"
 #include "zenorak_controller/Actuator.hpp"
 
 
@@ -43,13 +42,10 @@ class Zenorak_Hardware : public hardware_interface::SystemInterface
 
 struct Config
 {
-  std::string left_wheel_name = "";
-  std::string right_wheel_name = "";
-  float loop_rate = 0.0;
+  // Wheel/motor parameters removed
   std::string device = "";
   int baud_rate = 0;
   int timeout_ms = 0;
-  int enc_counts_per_rev = 0;
   std::string link1_name = "";
   std::string link2_name = "";
   std::string link3_name = "";
@@ -105,8 +101,7 @@ private:
 
   ArduinoComms comms_;
   Config cfg_;
-  Wheel wheel_l_;
-  Wheel wheel_r_;
+  // Wheels/motors removed - only actuators handled now
   Actuator Actuator_l1;
   Actuator Actuator_l2;
   Actuator Actuator_l3;

@@ -88,20 +88,6 @@ public:
   // {
   //   std::string response = send_msg("\r");
   // }
-  void read_encoder_values(int &val_1, int &val_2)
-  {
-    std::string response;
-    bool ok = send_msg("e\r", response);
-
-    if (!ok) {
-      // timeout → keep last values
-      return;
-    }
-
-    std::stringstream ss(response);
-    ss >> val_1 >> val_2;
-  }
-
   // Read three actuator values (e.g. ADC or encoder counts) from the Arduino.
   // Expected response: "v1 v2 v3\n" (space separated ints)
   void read_actuator_values(int &val_1, int &val_2, int &val_3)
@@ -124,12 +110,6 @@ public:
   {
     std::stringstream ss;
     ss << "s " << val_1 << " " << val_2 << " " << val_3 << "\r";
-    send_only(ss.str());
-  }
-  void set_motor_values(int val_1, int val_2)
-  {
-    std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
     send_only(ss.str());
   }
 
