@@ -1,5 +1,5 @@
-#ifndef ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
-#define ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
+#ifndef ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP
+#define ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP
 
 // #include <cstring>
 #include <sstream>
@@ -88,61 +88,34 @@ public:
   // {
   //   std::string response = send_msg("\r");
   // }
-  void read_encoder_values(int &val_1, int &val_2)
+  bool read_encoder_values(int &val_1, int &val_2)
   {
     std::string response;
     bool ok = send_msg("e\r", response);
 
     if (!ok) {
       // timeout → keep last values
-      return;
+      return false;
     }
 
     std::stringstream ss(response);
     ss >> val_1 >> val_2;
-  }
-
-  // Read three actuator values (e.g. ADC or encoder counts) from the Arduino.
-  // Expected response: "v1 v2 v3\n" (space separated ints)
-  void read_actuator_values(int &val_1, int &val_2, int &val_3)
-  {
-    std::string response;
-    bool ok = send_msg("a\r", response);
-
-    if (!ok) {
-      return;
-    }
-
-    std::stringstream ss(response);
-    ss >> val_1 >> val_2 >> val_3;
+    return true;
   }
 
 
-  // Send actuator target positions (in counts) to the Arduino.
-  // Message format: "s v1 v2 v3\r"
-  void set_actuator_positions(int val_1, int val_2, int val_3)
-  {
-    std::stringstream ss;
-    ss << "s " << val_1 << " " << val_2 << " " << val_3 << "\r";
-    send_only(ss.str());
-  }
+  
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
     ss << "m " << val_1 << " " << val_2 << "\r";
     send_only(ss.str());
   }
-
-  void set_pid_values(int k_p, int k_d, int k_i, int k_o)
-  {
-    std::stringstream ss;
-    ss << "u " << k_p << ":" << k_d << ":" << k_i << ":" << k_o << "\r";
-    // send_msg(ss.str());
-  }
+  
 
 private:
     LibSerial::SerialPort serial_conn_;
     int timeout_ms_;
 };
 
-#endif // ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
+#endif // ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP

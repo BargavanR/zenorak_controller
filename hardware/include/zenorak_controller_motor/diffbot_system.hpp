@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ZENORAK_CONTROLLER__DIFFBOT_SYSTEM_HPP_
-#define ZENORAK_CONTROLLER__DIFFBOT_SYSTEM_HPP_
+#ifndef ZENORAK_CONTROLLER_MOTOR__DIFFBOT_SYSTEM_HPP_
+#define ZENORAK_CONTROLLER_MOTOR__DIFFBOT_SYSTEM_HPP_
 
 #include <memory>
 #include <string>
@@ -29,16 +29,15 @@
 #include "rclcpp/time.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
-#include "zenorak_controller/visibility_control.h"
+#include "zenorak_controller_motor/visibility_control.h"
 
-#include "zenorak_controller/arduino_comms.hpp"
-#include "zenorak_controller/wheel.hpp"
-#include "zenorak_controller/Actuator.hpp"
+#include "zenorak_controller_motor/arduino_comms.hpp"
+#include "zenorak_controller_motor/wheel.hpp"
 
 
-namespace zenorak_controller
+namespace zenorak_controller_motor
 {
-class Zenorak_Hardware : public hardware_interface::SystemInterface
+class Zenorak_Hardware_Motor : public hardware_interface::SystemInterface
 {
 
 struct Config
@@ -50,54 +49,45 @@ struct Config
   int baud_rate = 0;
   int timeout_ms = 0;
   int enc_counts_per_rev = 0;
-  std::string link1_name = "";
-  std::string link2_name = "";
-  std::string link3_name = "";
-  int link1_enc_val = 0;
-  int link2_enc_val = 0;
-  int link3_enc_val = 0;
-  int pid_p = 0;
-  int pid_d = 0;
-  int pid_i = 0;
-  int pid_o = 0;
+  
 };
 
 
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(Zenorak_Hardware);
+  RCLCPP_SHARED_PTR_DEFINITIONS(Zenorak_Hardware_Motor);
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::CallbackReturn on_init(
     const hardware_interface::HardwareInfo & info) override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::CallbackReturn on_configure(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::CallbackReturn on_cleanup(
     const rclcpp_lifecycle::State & previous_state) override;
 
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::CallbackReturn on_activate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::return_type read(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
-  ZENORAK_CONTROLLER_PUBLIC
+  ZENORAK_CONTROLLER_MOTOR_PUBLIC
   hardware_interface::return_type write(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
@@ -107,11 +97,10 @@ private:
   Config cfg_;
   Wheel wheel_l_;
   Wheel wheel_r_;
-  Actuator Actuator_l1;
-  Actuator Actuator_l2;
-  Actuator Actuator_l3;
+  void try_reconnect();
+
 };
 
-}  // namespace zenorak_controller
+}  // namespace zenorak_controller_motor
 
-#endif  // ZENORAK_CONTROLLER__DIFFBOT_SYSTEM_HPP_
+#endif  // ZENORAK_CONTROLLER_MOTOR__DIFFBOT_SYSTEM_HPP_

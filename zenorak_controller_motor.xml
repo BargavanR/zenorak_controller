@@ -1,0 +1,7 @@
+<library path="zenorak_controller_motor">
+  <class name="zenorak_controller_motor/Zenorak_Hardware_Motor" type="zenorak_controller_motor::Zenorak_Hardware_Motor" base_class_type="hardware_interface::SystemInterface">
+    <description>
+    Zenorak_Hardware_Motor is a custom ros2_control system hardware interface designed for a mobile robotic platform that combines a differential-drive base with a three-degree-of-freedom linear-actuated manipulator. The interface accepts velocity commands for the left and right drive wheels via the diff_drive_controller and position commands for the manipulator joints via the joint_trajectory_controller. On the hardware side, wheel motion is driven using incremental encoder feedback, while each linear actuator is controlled in position using analog potentiometer feedback. The hardware interface performs all necessary unit conversions, including kinematic velocity-to-wheel mapping, joint angle-to-potentiometer scaling, and inverse state feedback conversion, enabling smooth closed-loop operation and seamless integration with standard ROS 2 controllers and visualization tools.
+    </description>
+  </class>
+</library>
