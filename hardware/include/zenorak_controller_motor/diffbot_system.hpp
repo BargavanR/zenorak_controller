@@ -31,6 +31,9 @@
 #include "rclcpp_lifecycle/state.hpp"
 #include "zenorak_controller_motor/visibility_control.h"
 
+// Hardware-specific helpers used by this SystemInterface implementation
+// ArduinoComms: serial/Arduino communication helpers
+// Wheel: simple POD storing encoder, command and state
 #include "zenorak_controller_motor/arduino_comms.hpp"
 #include "zenorak_controller_motor/wheel.hpp"
 
@@ -49,7 +52,13 @@ struct Config
   int baud_rate = 0;
   int timeout_ms = 0;
   int enc_counts_per_rev = 0;
-  
+  // Notes:
+  // - left_wheel_name/right_wheel_name: names of the joint entries in your URDF/xacro
+  // - loop_rate: control loop frequency used to convert velocity to counts-per-loop
+  // - device: serial device path (eg. /dev/ttyACM0)
+  // - baud_rate / timeout_ms: serial settings used by ArduinoComms
+  // - enc_counts_per_rev: encoder resolution used to compute radians from counts
+
 };
 
 
@@ -97,6 +106,8 @@ private:
   Config cfg_;
   Wheel wheel_l_;
   Wheel wheel_r_;
+  // try_reconnect: convenience method used when the serial connection is lost.
+  // It attempts to reconnect the serial port every couple of seconds.
   void try_reconnect();
 
 };
