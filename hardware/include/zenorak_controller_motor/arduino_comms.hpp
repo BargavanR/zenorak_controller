@@ -1,13 +1,21 @@
-#ifndef ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
-#define ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
+#ifndef ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP
+#define ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP
 
 // #include <cstring>
+// ArduinoComms: small convenience class that wraps a serial connection
+// to an Arduino (or other microcontroller) using LibSerial. It sends simple
+// ASCII commands and reads ASCII responses. The hardware plugin uses this
+// class to read wheel encoder values and to send motor commands.
+
 #include <sstream>
 // #include <cstdlib>
 #include <libserial/SerialPort.h>
 #include <iostream>
 
 
+// convert_baud_rate: helper that maps an integer baud rate (e.g. 115200)
+// to LibSerial::BaudRate enum used by the library. If an unsupported baud
+// rate is passed, it logs a message and returns a safe default.
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
 {
   // Just handle some common baud rates
@@ -34,8 +42,11 @@ class ArduinoComms
 
 public:
 
+  // default ctor
   ArduinoComms() = default;
 
+  // connect: open the serial device at the requested baud and store timeout
+  // Syntax: connect("/dev/ttyACM0", 115200, 1000);
   void connect(const std::string &serial_device, int32_t baud_rate, int32_t timeout_ms)
   {  
     timeout_ms_ = timeout_ms;
@@ -43,30 +54,28 @@ public:
     serial_conn_.SetBaudRate(convert_baud_rate(baud_rate));
   }
 
+  // disconnect: close the underlying serial connection
   void disconnect()
   {
     serial_conn_.Close();
   }
 
+  // connected: query if the port is currently open
   bool connected() const
   {
     return serial_conn_.IsOpen();
   }
 
-  // std::string send_and_receive(const std::string &msg)
-  // {
-  //   serial_conn_.Write(msg);
-
-  //   std::string response;
-  //   serial_conn_.ReadLine(response, '\n', timeout_ms_);
-  //   return response;
-  // }
+  // send_only: send a message and do not wait for a response
+  // Example usage: send_only("m 10 -10\r") to set motor speeds
   void send_only(const std::string &msg)
   {
     serial_conn_.Write(msg);
   }
 
 
+  // send_msg: send message and attempt to read a single line response.
+  // Returns true on success (response filled), false on timeout
   bool send_msg(const std::string &msg_to_send, std::string &response)
 {
   try
@@ -84,48 +93,27 @@ public:
 }
 
 
-  // void send_empty_msg()
-  // {
-  //   std::string response = send_msg("\r");
-  // }
-  void read_encoder_values(int &val_1, int &val_2)
+  // read_encoder_values: ask the microcontroller for encoder counts.
+  // Expected microcontroller reply: two integers separated by space and newline,
+  // e.g. "123 -456\n". On success this fills val_1 and val_2 and returns true.
+  bool read_encoder_values(int &val_1, int &val_2)
   {
     std::string response;
     bool ok = send_msg("e\r", response);
 
     if (!ok) {
       // timeout → keep last values
-      return;
+      return false;
     }
 
     std::stringstream ss(response);
     ss >> val_1 >> val_2;
-  }
-
-  // Read three actuator values (e.g. ADC or encoder counts) from the Arduino.
-  // Expected response: "v1 v2 v3\n" (space separated ints)
-  void read_actuator_values(int &val_1, int &val_2, int &val_3)
-  {
-    std::string response;
-    bool ok = send_msg("a\r", response);
-
-    if (!ok) {
-      return;
-    }
-
-    std::stringstream ss(response);
-    ss >> val_1 >> val_2 >> val_3;
+    return true;
   }
 
 
-  // Send actuator target positions (in counts) to the Arduino.
-  // Message format: "s v1 v2 v3\r"
-  void set_actuator_positions(int val_1, int val_2, int val_3)
-  {
-    std::stringstream ss;
-    ss << "s " << val_1 << " " << val_2 << " " << val_3 << "\r";
-    send_only(ss.str());
-  }
+  // set_motor_values: build and send the ASCII command the Arduino expects
+  // Format used: "m <left_counts> <right_counts>\r"
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
@@ -133,16 +121,12 @@ public:
     send_only(ss.str());
   }
 
-  void set_pid_values(int k_p, int k_d, int k_i, int k_o)
-  {
-    std::stringstream ss;
-    ss << "u " << k_p << ":" << k_d << ":" << k_i << ":" << k_o << "\r";
-    // send_msg(ss.str());
-  }
 
 private:
+    // serial connection object from LibSerial
     LibSerial::SerialPort serial_conn_;
+    // read timeout in milliseconds used by ReadLine
     int timeout_ms_;
 };
 
-#endif // ZENORAK_CONTROLLER_ARDUINO_COMMS_HPP
+#endif // ZENORAK_CONTROLLER_MOTOR_ARDUINO_COMMS_HPP

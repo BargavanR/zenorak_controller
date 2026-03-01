@@ -1,31 +1,19 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="diffbot_ros2_control" params="name prefix link1_name='link_1_joint' link2_name='link_2_joint' link3_name='link_3_joint'">
+  <xacro:macro name="diffbot_ros2_control" params="name prefix">
 
     <ros2_control name="${name}" type="system">
       <hardware>
-        <plugin>zenorak_controller/Zenorak_Hardware</plugin>
+        <plugin>zenorak_controller_motor/Zenorak_Hardware_Motor</plugin>
         <param name="left_wheel_name">left_wheel_joint</param>
         <param name="right_wheel_name">right_wheel_joint</param>
-        <param name="loop_rate">10</param>
+        <param name="loop_rate">30</param>
         <param name="device">/dev/ttyACM0</param>
         <param name="baud_rate">115200</param>
         <param name="timeout_ms">1000</param>
-        <param name="enc_counts_per_rev">32</param>
-        <param name="pid_p">20</param>
-        <param name="pid_d">12</param>
-        <param name="pid_i">0</param>
-        <param name="pid_o">50</param>
-        <!-- Manipulator link names and encoder/ADC mapping values -->
-        <!-- Use macro parameters so these names are available when the macro is instantiated -->
-        <param name="link1_name">${link1_name}</param>
-        <param name="link2_name">${link2_name}</param>
-        <param name="link3_name">${link3_name}</param>
-        <!-- counts per revolution or ADC full-scale mapping used by Actuator.setup -->
-        <param name="link1_enc_val">1023</param>
-        <param name="link2_enc_val">1023</param>
-        <param name="link3_enc_val">1023</param>
+        <param name="enc_counts_per_rev">3000</param>
+        <!-- Actuator/arm parameters removed; hardware now exposes only wheel joints and encoders -->
       </hardware>
       <joint name="${prefix}left_wheel_joint">
         <command_interface name="velocity"/>
@@ -38,21 +26,7 @@
         <state_interface name="velocity"/>
       </joint>
 
-      <!-- Manipulator joints: these should match the joint names in your robot URDF/xacro -->
-      <joint name="${prefix}${link1_name}">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-      </joint>
-
-      <joint name="${prefix}${link2_name}">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-      </joint>
-
-      <joint name="${prefix}${link3_name}">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-      </joint>
+      <!-- Manipulator joints removed from ros2_control - only wheels are controlled by this hardware plugin -->
     </ros2_control>
 
 

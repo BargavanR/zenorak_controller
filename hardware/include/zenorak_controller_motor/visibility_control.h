@@ -19,38 +19,38 @@
  * library cannot have, but the consuming code must have inorder to link.
  */
 
-#ifndef ZENORAK_CONTROLLER__VISIBILITY_CONTROL_H_
-#define ZENORAK_CONTROLLER__VISIBILITY_CONTROL_H_
+#ifndef ZENORAK_CONTROLLER_MOTOR__VISIBILITY_CONTROL_H_
+#define ZENORAK_CONTROLLER_MOTOR__VISIBILITY_CONTROL_H_
 
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __GNUC__
-#define ZENORAK_CONTROLLER_EXPORT __attribute__((dllexport))
-#define ZENORAK_CONTROLLER_IMPORT __attribute__((dllimport))
+#define ZENORAK_CONTROLLER_MOTOR_EXPORT __attribute__((dllexport))
+#define ZENORAK_CONTROLLER_MOTOR_IMPORT __attribute__((dllimport))
 #else
-#define ZENORAK_CONTROLLER_EXPORT __declspec(dllexport)
-#define ZENORAK_CONTROLLER_IMPORT __declspec(dllimport)
+#define ZENORAK_CONTROLLER_MOTOR_EXPORT __declspec(dllexport)
+#define ZENORAK_CONTROLLER_MOTOR_IMPORT __declspec(dllimport)
 #endif
-#ifdef ZENORAK_CONTROLLER_BUILDING_DLL
-#define ZENORAK_CONTROLLER_PUBLIC ZENORAK_CONTROLLER_EXPORT
+#ifdef ZENORAK_CONTROLLER_MOTOR_BUILDING_DLL
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC ZENORAK_CONTROLLER_MOTOR_EXPORT
 #else
-#define ZENORAK_CONTROLLER_PUBLIC ZENORAK_CONTROLLER_IMPORT
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC ZENORAK_CONTROLLER_MOTOR_IMPORT
 #endif
-#define ZENORAK_CONTROLLER_PUBLIC_TYPE ZENORAK_CONTROLLER_PUBLIC
-#define ZENORAK_CONTROLLER_LOCAL
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC_TYPE ZENORAK_CONTROLLER_MOTOR_PUBLIC
+#define ZENORAK_CONTROLLER_MOTOR_LOCAL
 #else
-#define ZENORAK_CONTROLLER_EXPORT __attribute__((visibility("default")))
-#define ZENORAK_CONTROLLER_IMPORT
+#define ZENORAK_CONTROLLER_MOTOR_EXPORT __attribute__((visibility("default")))
+#define ZENORAK_CONTROLLER_MOTOR_IMPORT
 #if __GNUC__ >= 4
-#define ZENORAK_CONTROLLER_PUBLIC __attribute__((visibility("default")))
-#define ZENORAK_CONTROLLER_LOCAL __attribute__((visibility("hidden")))
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC __attribute__((visibility("default")))
+#define ZENORAK_CONTROLLER_MOTOR_LOCAL __attribute__((visibility("hidden")))
 #else
-#define ZENORAK_CONTROLLER_PUBLIC
-#define ZENORAK_CONTROLLER_LOCAL
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC
+#define ZENORAK_CONTROLLER_MOTOR_LOCAL
 #endif
-#define ZENORAK_CONTROLLER_PUBLIC_TYPE
+#define ZENORAK_CONTROLLER_MOTOR_PUBLIC_TYPE
 #endif
 
-#endif  // ZENORAK_CONTROLLER__VISIBILITY_CONTROL_H_
+#endif  // ZENORAK_CONTROLLER_MOTOR__VISIBILITY_CONTROL_H_

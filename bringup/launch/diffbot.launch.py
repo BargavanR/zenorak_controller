@@ -29,7 +29,7 @@ def generate_launch_description():
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("zenorak_controller"), "urdf", "diffbot.urdf.xacro"]
+                [FindPackageShare("zenorak_controller_motor"), "urdf", "diffbot.urdf.xacro"]
             ),
         ]
     )
@@ -38,13 +38,13 @@ def generate_launch_description():
 
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare("zenorak_controller"),
+            FindPackageShare("zenorak_controller_motor"),
             "config",
             "diffbot_controllers.yaml",
         ]
     )
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare("zenorak_controller"), "rviz", "diffbot.rviz"]
+        [FindPackageShare("zenorak_controller_motor"), "rviz", "diffbot.rviz"]
     )
 
     control_node = Node(
@@ -82,12 +82,12 @@ def generate_launch_description():
         arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
     )
 
-    # Spawner for arm_trajectory_controller (group controller for manipulator)
-    arm_trajectory_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["arm_trajectory_controller", "--controller-manager", "/controller_manager"],
-    )
+    # # Spawner for arm_trajectory_controller (group controller for manipulator)
+    # arm_trajectory_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["arm_trajectory_controller", "--controller-manager", "/controller_manager"],
+    # )
 
     # Delay rviz start after `joint_state_broadcaster`
     delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
@@ -97,20 +97,21 @@ def generate_launch_description():
         )
     )
 
-    # Delay start of robot_controller after `joint_state_broadcaster`
-    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[robot_controller_spawner, arm_trajectory_spawner],
-        )
-    )
+    # # Delay start of robot_controller after `joint_state_broadcaster`
+    # delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
+    #     event_handler=OnProcessExit(
+    #         target_action=joint_state_broadcaster_spawner,
+    #         on_exit=[robot_controller_spawner, arm_trajectory_spawner],
+    #     )
+    # )
 
     nodes = [
         control_node,
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+        robot_controller_spawner
+       # delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
     ]
 
     return LaunchDescription(nodes)
